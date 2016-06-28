@@ -13,16 +13,16 @@
 //全局配置，如果采用默认均不需要改动
     var config =  {
         path: '', //laydate所在路径
+        defSkin: 'default', //初始化皮肤
         format: 'YYYY-MM-DD', //日期格式
         min: '1900-01-01 00:00:00', //最小日期
         max: '2099-12-31 23:59:59', //最大日期
-        voidDate:[],
         isv: false,
         init: true
     };
 
     var Dates = {}, doc = document, creat = 'createElement', byid = 'getElementById', tags = 'getElementsByTagName';
-    var as = ['laydate_box', 'laydate_void', 'laydate_click'];
+    var as = ['laydate_box', 'laydate_void', 'laydate_click', 'LayDateSkin', 'skin/', '/laydate.css'];
 
 
 //主接口
@@ -37,7 +37,21 @@
 
     laydate.v = '1.1';
 
+//获取组件存放路径
+    Dates.getPath = (function(){
+        var js = document.scripts, jsPath = js[js.length - 1].src;
+        return config.path ? config.path : jsPath.substring(0, jsPath.lastIndexOf("/") + 1);
+    }());
 
+    Dates.use = function(lib, id){
+        var link = doc[creat]('link');
+        link.type = 'text/css';
+        link.rel = 'stylesheet';
+        link.href = Dates.getPath + lib + as[5];
+        id && (link.id = id);
+        doc[tags]('head')[0].appendChild(link);
+        link = null;
+    };
 
     Dates.trim = function(str){
         str = str || '';
@@ -226,59 +240,8 @@
                 }
             }
         }
-
-        if(!!back.length){
-            return back;
-      }else{
-       return Dates.checkVoid2(YY, MM, DD);
-
-      }
-
-    };
-
-    Dates.checkVoid2 = function (YY, MM, DD) {
-        var voidDate = Dates.options.voidDate;
-        var back = [];
-        YY = YY | 0;
-        MM = MM | 0;
-        DD = DD | 0;
-        for (var i = 0, len = voidDate.length; i < len; i++) {
-            var vmin = voidDate[i].min.match(/\d+/g);
-            var vmax = voidDate[i].max.match(/\d+/g);
-            if (YY > vmin[0] && YY < vmax[0]) {
-                back = ['y'];
-            }
-            if (YY == vmin[0]) {
-                if (MM > vmin[1] && MM < vmax[1]) {
-                    back = ['m'];
-                } else if (MM == vmin[1]) {
-                    if(DD > vmin[2]&&MM < vmax[1]){
-                        back = ['d'];
-                    }
-                    if (DD > vmin[2] && DD < vmax[2]) {
-                        back = ['d'];
-                    }
-                }
-            }
-            if (YY == vmax[0]) {
-                if (MM > vmin[1] && MM < vmax[1]) {
-                    back = ['m'];
-                } else if (MM == vmax[1]) {
-                    if(MM > vmin[1]&&DD < vmax[2]){
-                        back = ['d'];
-                    }
-                    if (DD > vmin[2] && DD < vmax[2]) {
-                        back = ['d'];
-                    }
-                }
-            }
-            if (!!back.length) {
-                return back;
-            }
-        }
-
         return back;
-    }
+    };
 
 //时分秒的有效检测
     Dates.timeVoid = function(times, index){
@@ -882,7 +845,11 @@
         });
     };
 
-
+    Dates.init = (function(){
+        Dates.use('need');
+        Dates.use(as[4] + config.defSkin, as[3]);
+        Dates.skinLink = Dates.query('#'+as[3]);
+    }());
 
 //重置定位
     laydate.reset = function(){
@@ -901,6 +868,9 @@
         );
     };
 
-
+//皮肤选择
+    laydate.skin = function(lib){
+        Dates.skinLink.href = Dates.getPath + as[4] + lib + as[5];
+    };
 
 }(window);

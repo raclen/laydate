@@ -24,6 +24,8 @@ skins是皮肤目录
 4. 修复星期未居中对齐的样式问题
 5. 修复在页面加载完毕事件中，调用laydate所造成的立即执行的bug
 6. 皮肤包新增[墨绿]。
+7. 去掉样式通过js引入的方式
+8. 自定义禁用某个时间段
 
 ## 备注
 [官网](http://sentsin.com/layui/laydate/)、[Say交流](http://say.sentsin.com/home-58.html)
