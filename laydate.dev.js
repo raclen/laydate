@@ -173,10 +173,11 @@
                 Dates.stopMosup(devt, that);
                 Dates.on(that, devt, function(ev){
                     Dates.stopmp(ev);
-                    if(that !== Dates.elem){
-                        Dates.view(that, options);
-                        Dates.reshow();
-                    }
+                    // if(that !== Dates.elem){
+
+                    // }
+                    Dates.view(that, options);
+                    Dates.reshow();
                 });
             });
         }
@@ -197,54 +198,57 @@
     };
 
 //检测是否在有效期
-    Dates.checkVoid = function(YY, MM, DD){
+    Dates.checkVoid = function (YY, MM, DD) {
         var back = [];
-        YY = YY|0;
-        MM = MM|0;
-        DD = DD|0;
-        if(YY < Dates.mins[0]){
+        YY = YY | 0;
+        MM = MM | 0;
+        DD = DD | 0;
+        if (YY < Dates.mins[0]) {
             back = ['y'];
-        } else if(YY > Dates.maxs[0]){
+        } else if (YY > Dates.maxs[0]) {
             back = ['y', 1];
-        } else if(YY >= Dates.mins[0] && YY <= Dates.maxs[0]){
-            if(YY == Dates.mins[0]){
-                if(MM < Dates.mins[1]){
+        } else if (YY >= Dates.mins[0] && YY <= Dates.maxs[0]) {
+            if (YY == Dates.mins[0]) {
+                if (MM < Dates.mins[1]) {
                     back = ['m'];
-                } else if(MM == Dates.mins[1]){
-                    if(DD < Dates.mins[2]){
+                } else if (MM == Dates.mins[1]) {
+                    if (DD < Dates.mins[2]) {
                         back = ['d'];
                     }
                 }
             }
-            if(YY == Dates.maxs[0]){
-                if(MM > Dates.maxs[1]){
+            if (YY == Dates.maxs[0]) {
+                if (MM > Dates.maxs[1]) {
                     back = ['m', 1];
-                } else if(MM == Dates.maxs[1]){
-                    if(DD > Dates.maxs[2]){
+                } else if (MM == Dates.maxs[1]) {
+                    if (DD > Dates.maxs[2]) {
                         back = ['d', 1];
                     }
                 }
             }
         }
 
-        if(!!back.length){
+        if (!!back.length) {
             return back;
-      }else{
-       return Dates.checkVoid2(YY, MM, DD);
+        } else {
+            return Dates.checkVoid2(YY, MM, DD);
 
-      }
+        }
 
     };
 
     Dates.checkVoid2 = function (YY, MM, DD) {
         var voidDate = Dates.options.voidDate;
+        if(!voidDate){
+            return [];
+        }
         var back = [];
         YY = YY | 0;
         MM = MM | 0;
         DD = DD | 0;
         for (var i = 0, len = voidDate.length; i < len; i++) {
-            var vmin = voidDate[i].min.match(/\d+/g);
-            var vmax = voidDate[i].max.match(/\d+/g);
+            var vmin = voidDate[i].start.match(/\d+/g);
+            var vmax = voidDate[i].end.match(/\d+/g);
             if (YY > vmin[0] && YY < vmax[0]) {
                 back = ['y'];
             }
@@ -252,10 +256,10 @@
                 if (MM > vmin[1] && MM < vmax[1]) {
                     back = ['m'];
                 } else if (MM == vmin[1]) {
-                    if(DD > vmin[2]&&MM < vmax[1]){
+                    if (DD >= vmin[2] && MM < vmax[1]) {
                         back = ['d'];
                     }
-                    if (DD > vmin[2] && DD < vmax[2]) {
+                    if (DD >= vmin[2] && DD <= vmax[2]) {
                         back = ['d'];
                     }
                 }
@@ -264,10 +268,10 @@
                 if (MM > vmin[1] && MM < vmax[1]) {
                     back = ['m'];
                 } else if (MM == vmax[1]) {
-                    if(MM > vmin[1]&&DD < vmax[2]){
+                    if (MM > vmin[1] && DD <= vmax[2]) {
                         back = ['d'];
                     }
-                    if (DD > vmin[2] && DD < vmax[2]) {
+                    if (DD >= vmin[2] && DD <= vmax[2]) {
                         back = ['d'];
                     }
                 }
@@ -430,18 +434,6 @@
         });
         Dates.addClass(as.mms[Dates.ymd[1]], as[2]);
 
-        //定位时分秒
-        log.times = [
-            Dates.inymd[3]|0 || 0,
-            Dates.inymd[4]|0 || 0,
-            Dates.inymd[5]|0 || 0
-        ];
-        Dates.each(new Array(3), function(i){
-            Dates.hmsin[i].value = Dates.digit(Dates.timeVoid(log.times[i], i) ? Dates.mins[i+3]|0 : log.times[i]|0);
-        });
-
-        //确定按钮状态
-        Dates[Dates.valid ? 'removeClass' : 'addClass'](as.ok, as[1]);
     };
 
 //节日
@@ -511,16 +503,7 @@
         Dates.viewDate(ymd[0], ymd[1]-1, ymd[2]);
     };
 
-//是否显示零件
-    Dates.iswrite = function(){
-        var S = Dates.query, log = {
-            time: S('#laydate_hms')
-        };
-        Dates.shde(log.time, !Dates.options.istime);
-        Dates.shde(as.oclear, !('isclear' in Dates.options ? Dates.options.isclear : 1));
-        Dates.shde(as.otoday, !('istoday' in Dates.options ? Dates.options.istoday : 1));
-        Dates.shde(as.ok, !('issure' in Dates.options ? Dates.options.issure : 1));
-    };
+
 
 //方位辨别
     Dates.orien = function(obj, pos){
@@ -620,19 +603,6 @@
 
             + Dates.viewtb
 
-            +'<div class="laydate_bottom">'
-            +'<ul id="laydate_hms">'
-            +'<li class="laydate_sj">时间</li>'
-            +'<li><input readonly>:</li>'
-            +'<li><input readonly>:</li>'
-            +'<li><input readonly></li>'
-            +'</ul>'
-            +'<div class="laydate_time" id="laydate_time"></div>'
-            +'<div class="laydate_btn">'
-            +'<a id="laydate_clear">清空</a>'
-            +'<a id="laydate_today">今天</a>'
-            +'<a id="laydate_ok">确认</a>'
-            +'</div>'
             +(config.isv ? '<a href="http://sentsin.com/layui/laydate/" class="laydate_v" target="_blank">laydate-v'+ laydate.v +'</a>' : '')
             +'</div>';
             doc.body.appendChild(div);
@@ -647,7 +617,6 @@
         Dates.stopMosup('click', Dates.box);
 
         Dates.initDate();
-        Dates.iswrite();
         Dates.check();
     };
 
@@ -678,8 +647,8 @@
 
 //返回最终日期
     Dates.creation = function(ymd, hide){
-        var S = Dates.query, hms = Dates.hmsin;
-        var getDates = Dates.parse(ymd, [hms[0].value, hms[1].value, hms[2].value]);
+        var S = Dates.query;
+        var getDates = Dates.parse(ymd);
         Dates.elem[as.elemv] = getDates;
         if(!hide){
             Dates.close();
@@ -785,104 +754,21 @@
                 }
             });
         });
-
-        //清空
-        as.oclear = S('#laydate_clear');
-        Dates.on(as.oclear, 'click', function(){
-            Dates.elem[as.elemv] = '';
-            Dates.close();
-        });
-
-        //今天
-        as.otoday = S('#laydate_today');
-        Dates.on(as.otoday, 'click', function(){
-            var now = new Date();
-            Dates.creation([now.getFullYear(), now.getMonth() + 1, now.getDate()]);
-        });
-
-        //确认
-        as.ok = S('#laydate_ok');
-        Dates.on(as.ok, 'click', function(){
-            if(Dates.valid){
-                Dates.creation([Dates.ymd[0], Dates.ymd[1]+1, Dates.ymd[2]]);
-            }
-        });
-
-        //选择时分秒
-        log.times = S('#laydate_time');
-        Dates.hmsin = log.hmsin = S('#laydate_hms input');
-        log.hmss = ['小时', '分钟', '秒数'];
-        log.hmsarr = [];
-
-        //生成时分秒或警告信息
-        Dates.msg = function(i, title){
-            var str = '<div class="laydte_hsmtex">'+ (title || '提示') +'<span>×</span></div>';
-            if(typeof i === 'string'){
-                str += '<p>'+ i +'</p>';
-                Dates.shde(S('#'+as[0]));
-                Dates.removeClass(log.times, 'laydate_time1').addClass(log.times, 'laydate_msg');
-            } else {
-                if(!log.hmsarr[i]){
-                    str += '<div id="laydate_hmsno" class="laydate_hmsno">';
-                    Dates.each(new Array(i === 0 ? 24 : 60), function(i){
-                        str += '<span>'+ i +'</span>';
-                    });
-                    str += '</div>'
-                    log.hmsarr[i] = str;
-                } else {
-                    str = log.hmsarr[i];
-                }
-                Dates.removeClass(log.times, 'laydate_msg');
-                Dates[i=== 0 ? 'removeClass' : 'addClass'](log.times, 'laydate_time1');
-            }
-            Dates.addClass(log.times, 'laydate_show');
-            log.times.innerHTML = str;
-        };
-
-        log.hmson = function(input, index){
-            var span = S('#laydate_hmsno span'), set = Dates.valid ? null : 1;
-            Dates.each(span, function(i, elem){
-                if(set){
-                    Dates.addClass(elem, as[1]);
-                } else if(Dates.timeVoid(i, index)){
-                    Dates.addClass(elem, as[1]);
-                } else {
-                    Dates.on(elem, 'click', function(ev){
-                        if(!Dates.hasClass(this, as[1])){
-                            input.value = Dates.digit(this.innerHTML|0);
-                        }
-                    });
-                }
-            });
-            Dates.addClass(span[input.value|0], 'laydate_click');
-        };
-
-        //展开选择
-        Dates.each(log.hmsin, function(i, elem){
-            Dates.on(elem, 'click', function(ev){
-                Dates.stopmp(ev).reshow();
-                Dates.msg(i, log.hmss[i]);
-                log.hmson(this, i);
-            });
-        });
-
         Dates.on(doc, 'mouseup', function(){
-            var box = S('#'+as[0]);
-            if(box && box.style.display !== 'none'){
-                Dates.check() || Dates.close();
-            }
-        }).on(doc, 'keydown', function(event){
-            event = event || win.event;
-            var codes = event.keyCode;
+          var box = S('#'+as[0]);
+          if(box && box.style.display !== 'none'){
+              Dates.check() || Dates.close();
+          }
+      }).on(doc, 'keydown', function(event){
+          event = event || win.event;
+          var codes = event.keyCode;
 
-            //如果在日期显示的时候按回车
-            if(codes === 13 && Dates.elem){
-                Dates.creation([Dates.ymd[0], Dates.ymd[1]+1, Dates.ymd[2]]);
-            }
-        });
+          //如果在日期显示的时候按回车
+          if(codes === 13 && Dates.elem){
+              Dates.creation([Dates.ymd[0], Dates.ymd[1]+1, Dates.ymd[2]]);
+          }
+      });
     };
-
-
 
 //重置定位
     laydate.reset = function(){
